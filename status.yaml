@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  title: LongAP status API
+  version: "2.0"
+  description: LongAP hotspot status API
+
+servers:
+  - url: https://status.longap.com/hotspot
+    description: live
+
+     
+paths:
+  /status/{name}:
+    parameters:
+      - name: name
+        description: hotspot name
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Name'
+    get:
+      summary: hotspot status by name
+      responses:
+        200:
+          description: hotspot status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+  /status/{serial}:
+    parameters:
+      - name: serial
+        description: hotspot serial
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/Serial'
+    get:
+      summary: hotspot status by serial
+      responses:
+        200:
+          description: hotspot status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+  /status/{publicKey}:
+    parameters:
+      - name: publicKey
+        description: hotspot public key
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/PublicKey'
+    get:
+      summary: hotspot status by public key
+      responses:
+        200:
+          description: hotspot status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+    PublicKey:
+      type: string
+      description: Hotspot public key
+      example: 11fmeSnvRr3vtUfpFiM96sxGvt6Cc7RFFQ6a8CLqYAcYcMG9vBs
+    Name:
+      type: string
+      description: hotspot name
+      example: Interesting Smoke Elephant
+    Serial:
+      type: string
+      description: hotspot serial
+      example: 000DB9553ECC
+
+    Status:
+      type: object
+      description: Hotspot status
+      properties:
+        publicKey:
+          $ref: "#/components/schemas/PublicKey"
+        name:
+          $ref: "#/components/schemas/Name"
+        serial:
+          $ref: "#/components/schemas/Serial"
+        model:
+          type: string
+          description: hotspot model
+          example: longap-one
+        status:
+          type: string
+          enum: [online, offline]
+          description: indication if the hotspot is connected to a validator
+        miner:
+          type: object
+          properties:
+            lastUpdate:
+              type: string
+              format: date-time
+              description: last time the hotspot reported a status update
+              example: 2022-07-15T10:47:20.380563+02:00
+            dockerImage:
+              type: string
+              description: Helium miner docker image version
+              example: 2022.07.14.0
+            dnsOk:
+              type: boolean
+              description: indication if dns is working
+
+  responses:
+    BadRequestError:
+      description: Bad request
+    UnauthorizedError:
+      description: Authorization token is missing, invalid or caller lacks permissions to perform operation
+    NotFoundError:
+      description: Resource not found
+    InternalServerError:
+      description: Internal server error
